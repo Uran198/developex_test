@@ -1,6 +1,9 @@
+from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
-from django.views.generic import FormView, TemplateView
-from django.contrib.auth import login
+from django.views.generic import FormView, TemplateView, RedirectView
+from django.contrib.auth import login, logout
+
+from braces.views import LoginRequiredMixin
 
 from .forms import PinForm, LoginForm
 
@@ -8,6 +11,11 @@ from .forms import PinForm, LoginForm
 class LoginView(FormView):
     template_name = 'terminal/login.html'
     form_class = LoginForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            return redirect('terminal:operations')
+        return super(LoginView, self).dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse('terminal:pin', kwargs={'number': self.number})
@@ -34,5 +42,15 @@ class PinView(FormView):
         return super(PinView, self).form_valid(form)
 
 
-class OperationsView(TemplateView):
+class LogoutView(RedirectView):
+    http_method_names = [u'post']
+    permanent = False
+    url = '/'
+
+    def post(self, request, *args, **kwargs):
+        logout(request)
+        return super(LogoutView, self).post(request, *args, **kwargs)
+
+
+class OperationsView(LoginRequiredMixin, TemplateView):
     template_name = 'terminal/operations.html'

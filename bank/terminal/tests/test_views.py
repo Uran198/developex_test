@@ -24,6 +24,13 @@ class LoginViewTest(TestCase):
         self.view.form_valid(f)
         self.assertEqual(self.view.number, user.number)
 
+    @mock.patch('bank.terminal.views.redirect')
+    def test_dispatch(self, mock):
+        request = RequestFactory().get('fake')
+        request.user = UserFactory()
+        self.view.dispatch(request)
+        self.assertEqual(len(mock.mock_calls), 1)
+
 
 class PinViewTest(TestCase):
 
@@ -44,4 +51,16 @@ class PinViewTest(TestCase):
         self.assertEqual(f.is_valid(), True)
         self.view.request = RequestFactory().post('/fake')
         self.view.form_valid(f)
+        self.assertEqual(len(mock.mock_calls), 1)
+
+
+class LogoutViewTest(TestCase):
+
+    def setUp(self):
+        self.view = views.LogoutView()
+
+    @mock.patch('bank.terminal.views.logout')
+    def test_post(self, mock):
+        self.view.request = RequestFactory().post('/fake')
+        self.view.post(self.view.request)
         self.assertEqual(len(mock.mock_calls), 1)

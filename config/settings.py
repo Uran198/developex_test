@@ -150,3 +150,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'terminal.CardUser'
+
+LOGIN_URL = 'terminal:card'
