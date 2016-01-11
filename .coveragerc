@@ -1,0 +1,5 @@
+[run]
+include = bank/*
+omit = *migrations*, *tests*
+plugins =
+    django_coverage_plugin
