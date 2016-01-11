@@ -1,3 +1,47 @@
-from django.test import TestCase
+from django.core.urlresolvers import reverse
+from django.test import mock, RequestFactory
 
-# Create your tests here.
+from test_plus import TestCase
+
+from .. import views
+from ..factories import UserFactory
+
+
+class LoginViewTest(TestCase):
+
+    def setUp(self):
+        self.view = views.LoginView()
+
+    def test_get_success_url(self):
+        self.view.number = 16*'2'
+        self.assertEqual(self.view.get_success_url(),
+                         reverse('terminal:pin', kwargs={'number': 16*'2'}))
+
+    def test_form_valid(self):
+        user = UserFactory()
+        f = self.view.get_form_class()({'number': user.number})
+        self.assertEqual(f.is_valid(), True)
+        self.view.form_valid(f)
+        self.assertEqual(self.view.number, user.number)
+
+
+class PinViewTest(TestCase):
+
+    def setUp(self):
+        self.view = views.PinView()
+
+    def test_get_initial(self):
+        self.view.kwargs = {'number': '10'}
+        self.assertDictEqual(self.view.get_initial(), {'number': '10'})
+
+    def test_get_success_url(self):
+        self.assertEqual(self.view.get_success_url(), reverse('terminal:operations'))
+
+    @mock.patch('bank.terminal.views.login')
+    def test_form_valid(self, mock):
+        user = UserFactory()
+        f = self.view.get_form_class()({'number': user.number, 'password': '1234'})
+        self.assertEqual(f.is_valid(), True)
+        self.view.request = RequestFactory().post('/fake')
+        self.view.form_valid(f)
+        self.assertEqual(len(mock.mock_calls), 1)
