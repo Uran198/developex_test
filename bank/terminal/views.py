@@ -83,3 +83,11 @@ class ShowBalanceView(LoginRequiredMixin, TemplateView):
             card=request.user,
         )
         return super(ShowBalanceView, self).get(request, *args, **kwargs)
+
+
+class OperationResultView(LoginRequiredMixin, TemplateView):
+    template_name = 'terminal/result.html'
+
+
+class ErrorView(TemplateView):
+    template_name = 'terminal/error.html'
