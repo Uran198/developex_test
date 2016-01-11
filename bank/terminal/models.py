@@ -20,6 +20,8 @@ class CardUser(AbstractBaseUser):
         )
     balance = models.IntegerField()
     is_blocked = models.BooleanField()
+    wrong_tries = models.IntegerField(default=0)
+
     objects = CardUserManager()
 
     USERNAME_FIELD = 'number'

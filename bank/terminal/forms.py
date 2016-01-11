@@ -17,8 +17,21 @@ class PinForm(forms.Form):
         user = authenticate(**self.cleaned_data)
         if user:
             self.user = user
+            user.wrong_tries = 0
+            user.save()
         else:
+            # increment number of wrong tries
+            try:
+                user = CardUser.objects.get(number=self.cleaned_data['number'])
+                user.wrong_tries += 1
+                if user.wrong_tries >= 4:
+                    user.is_blocked = True
+                user.save()
+            except CardUser.DoesNotExist:
+                pass
             raise forms.ValidationError("Wrong pin code")
+        if user.is_blocked:
+            raise forms.ValidationError("The card is blocked")
         return data
 
 
@@ -31,6 +44,6 @@ class LoginForm(forms.Form):
             user = CardUser.objects.get(number=self.cleaned_data['number'])
         except CardUser.DoesNotExist:
             raise forms.ValidationError("Such card does not exist")
-        # TODO: Validate if user is blocked
-        user
+        if user.is_blocked:
+            raise forms.ValidationError("The card is blocked")
         return data

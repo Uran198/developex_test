@@ -12,6 +12,7 @@ class PinFormTest(TestCase):
     def test_clean_success(self):
         form = PinForm({'number': self.user.number, 'password': '1234'})
         self.assertEqual(form.is_valid(), True)
+        self.assertEqual(form.user, self.user)
 
     def test_clean_wrong_pin(self):
         form = PinForm({'number': self.user.number, 'password': '12312214'})
@@ -22,6 +23,38 @@ class PinFormTest(TestCase):
         form = PinForm({'number': 16*'1', 'password': '12312214'})
         self.assertEqual(form.is_valid(), False)
         self.assertEqual(form.errors.as_data()['__all__'][0].message, "Wrong pin code")
+
+    def test_blocked_number(self):
+        self.user.is_blocked = True
+        self.user.save()
+        form = PinForm({'number': self.user.number, 'password': '1234'})
+        self.assertEqual(form.is_valid(), False)
+        self.assertEqual(form.errors.as_data()['__all__'][0].message, "The card is blocked")
+
+    def test_4_wrong_tries(self):
+        for _ in range(4):
+            form = PinForm({'number': self.user.number, 'password': '1235'})
+            form.is_valid()
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.is_blocked, True)
+
+    def test_3_wrong_tries(self):
+        for _ in range(3):
+            form = PinForm({'number': self.user.number, 'password': '1235'})
+            form.is_valid()
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.wrong_tries, 3)
+        self.assertEqual(self.user.is_blocked, False)
+
+    def test_reseting_wrong_tries(self):
+        form = PinForm({'number': self.user.number, 'password': '1235'})
+        form.is_valid()
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.wrong_tries, 1)
+        form = PinForm({'number': self.user.number, 'password': '1234'})
+        form.is_valid()
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.wrong_tries, 0)
 
 
 class LoginFormTest(TestCase):
@@ -36,3 +69,10 @@ class LoginFormTest(TestCase):
         form = LoginForm({'number': 16*'4'})
         self.assertEqual(form.is_valid(), False)
         self.assertEqual(form.errors.as_data()['__all__'][0].message, "Such card does not exist")
+
+    def test_blocked_number(self):
+        self.user.is_blocked = True
+        self.user.save()
+        form = LoginForm({'number': self.user.number})
+        self.assertEqual(form.is_valid(), False)
+        self.assertEqual(form.errors.as_data()['__all__'][0].message, "The card is blocked")
