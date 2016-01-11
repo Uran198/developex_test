@@ -31,3 +31,16 @@ class CardUser(AbstractBaseUser):
 
     def get_username(self):
         return self.number
+
+
+OPERATION_CHOICES = (
+    ('WD', 'Withdraw money'),
+    ('CB', 'Check balance'),
+)
+
+
+class Transaction(models.Model):
+    operation = models.CharField(max_length=2, choices=OPERATION_CHOICES)
+    date = models.DateTimeField(auto_now=True)
+    card = models.ForeignKey(CardUser)
+    amount = models.PositiveIntegerField(blank=True, null=True)

@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate
 
 from .models import CardUser
+from .models import Transaction
 
 
 class PinForm(forms.Form):
@@ -69,3 +70,8 @@ class WithdrawMoneyForm(forms.Form):
         if self.is_valid():
             self.instance.balance -= self.cleaned_data['amount']
             self.instance.save()
+            Transaction.objects.create(
+                operation='WD',
+                card=self.instance,
+                amount=self.cleaned_data['amount'],
+            )

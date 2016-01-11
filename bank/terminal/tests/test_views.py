@@ -5,6 +5,7 @@ from test_plus import TestCase
 
 from .. import views
 from ..factories import UserFactory
+from ..models import Transaction
 
 
 class LoginViewTest(TestCase):
@@ -89,3 +90,21 @@ class WithdrawMoneyViewTest(TestCase):
         self.view.form_valid(form)
         user.refresh_from_db()
         self.assertEqual(user.balance, 80)
+
+
+class ShowBalanceViewTest(TestCase):
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.view = views.ShowBalanceView()
+        self.factory = RequestFactory()
+
+    def test_get(self):
+        self.view.request = self.factory.get('fake/')
+        self.view.request.user = self.user
+        self.view.get(self.view.request)
+        self.assertEqual(len(Transaction.objects.all()), 1)
+        transaction = Transaction.objects.first()
+        self.assertEqual(transaction.operation, 'CB')
+        self.assertEqual(transaction.card, self.user)
+        self.assertEqual(transaction.amount, None)

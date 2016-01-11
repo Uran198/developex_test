@@ -6,6 +6,7 @@ from django.contrib.auth import login, logout
 from braces.views import LoginRequiredMixin
 
 from .forms import PinForm, LoginForm, WithdrawMoneyForm
+from .models import Transaction
 
 
 class LoginView(FormView):
@@ -71,3 +72,14 @@ class WithdrawMoneyView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         form.save()
         return super(WithdrawMoneyView, self).form_valid(form)
+
+
+class ShowBalanceView(LoginRequiredMixin, TemplateView):
+    template_name = 'terminal/balance.html'
+
+    def get(self, request, *args, **kwargs):
+        Transaction.objects.create(
+            operation='CB',
+            card=request.user,
+        )
+        return super(ShowBalanceView, self).get(request, *args, **kwargs)
