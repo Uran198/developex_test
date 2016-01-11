@@ -5,7 +5,7 @@ from django.contrib.auth import login, logout
 
 from braces.views import LoginRequiredMixin
 
-from .forms import PinForm, LoginForm
+from .forms import PinForm, LoginForm, WithdrawMoneyForm
 
 
 class LoginView(FormView):
@@ -54,3 +54,20 @@ class LogoutView(RedirectView):
 
 class OperationsView(LoginRequiredMixin, TemplateView):
     template_name = 'terminal/operations.html'
+
+
+class WithdrawMoneyView(LoginRequiredMixin, FormView):
+    template_name = 'terminal/withdraw.html'
+    form_class = WithdrawMoneyForm
+
+    def get_success_url(self):
+        return reverse('terminal:operations')
+
+    def get_form_kwargs(self):
+        kwargs = super(WithdrawMoneyView, self).get_form_kwargs()
+        kwargs['instance'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.save()
+        return super(WithdrawMoneyView, self).form_valid(form)

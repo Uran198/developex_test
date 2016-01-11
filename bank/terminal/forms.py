@@ -47,3 +47,25 @@ class LoginForm(forms.Form):
         if user.is_blocked:
             raise forms.ValidationError("The card is blocked")
         return data
+
+
+class WithdrawMoneyForm(forms.Form):
+    amount = forms.IntegerField(min_value=0)
+
+    def __init__(self, *args, **kwargs):
+        self.instance = kwargs.pop('instance', None)
+        super(WithdrawMoneyForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        data = super(WithdrawMoneyForm, self).clean()
+        amount = self.cleaned_data.get('amount')
+        if not self.instance or not amount:
+            return data
+        if amount > self.instance.balance:
+            raise forms.ValidationError("Insufficient balance")
+        return data
+
+    def save(self):
+        if self.is_valid():
+            self.instance.balance -= self.cleaned_data['amount']
+            self.instance.save()

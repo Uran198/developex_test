@@ -1,6 +1,6 @@
 from test_plus import TestCase
 
-from ..forms import PinForm, LoginForm
+from ..forms import PinForm, LoginForm, WithdrawMoneyForm
 from ..factories import UserFactory
 
 
@@ -76,3 +76,32 @@ class LoginFormTest(TestCase):
         form = LoginForm({'number': self.user.number})
         self.assertEqual(form.is_valid(), False)
         self.assertEqual(form.errors.as_data()['__all__'][0].message, "The card is blocked")
+
+
+class WithdrawMoneyFormTest(TestCase):
+    def setUp(self):
+        self.user = UserFactory(balance=100)
+        self.form = WithdrawMoneyForm
+
+    def test_clean_too_much(self):
+        form = self.form({'amount': 101}, instance=self.user)
+        self.assertEqual(form.is_valid(), False)
+        self.assertEqual(form.errors.as_data()['__all__'][0].message, "Insufficient balance")
+
+    def test_clean_success(self):
+        form = self.form({'amount': 100}, instance=self.user)
+        self.assertEqual(form.is_valid(), True)
+
+    def test_clean_too_little(self):
+        form = self.form({'amount': -1}, instance=self.user)
+        self.assertEqual(form.is_valid(), False)
+
+    def test_no_instance(self):
+        form = self.form({'amount': 102})
+        self.assertEqual(form.is_valid(), True)
+
+    def test_save(self):
+        form = self.form({'amount': 20}, instance=self.user)
+        form.save()
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.balance, 80)

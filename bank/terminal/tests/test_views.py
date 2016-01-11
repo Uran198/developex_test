@@ -64,3 +64,28 @@ class LogoutViewTest(TestCase):
         self.view.request = RequestFactory().post('/fake')
         self.view.post(self.view.request)
         self.assertEqual(len(mock.mock_calls), 1)
+
+
+class WithdrawMoneyViewTest(TestCase):
+
+    def setUp(self):
+        self.view = views.WithdrawMoneyView()
+        self.factory = RequestFactory()
+
+    def test_get_success_url(self):
+        self.assertEqual(self.view.get_success_url(), reverse('terminal:operations'))
+
+    def test_get_for_kwargs(self):
+        request = self.factory.get('fake/')
+        request.user = UserFactory()
+        self.view.request = request
+        kwargs = self.view.get_form_kwargs()
+        self.assertEqual(kwargs['instance'], request.user)
+
+    def test_form_valid(self):
+        user = UserFactory(balance=100)
+        form = self.view.get_form_class()({'amount': 20}, instance=user)
+        self.assertEqual(form.is_valid(), True)
+        self.view.form_valid(form)
+        user.refresh_from_db()
+        self.assertEqual(user.balance, 80)
