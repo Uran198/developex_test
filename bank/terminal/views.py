@@ -16,10 +16,6 @@ class LoginView(FormView):
         self.number = form.cleaned_data['number']
         return super(LoginView, self).form_valid(form)
 
-    def get_form_kwargs(self):
-        kwargs = super(LoginView, self).get_form_kwargs()
-        return kwargs
-
 
 class PinView(FormView):
     template_name = 'terminal/pin.html'
