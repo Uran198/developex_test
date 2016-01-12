@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<h1>Error</h1>
+
+{% for error in form.errors.values %}
+{{ error }}
+{% endfor %}
+
+<a href=""><button>Back</button></a>
+
+{# {{ request.META.HTTP_REFERER }} #}
+
+{% endblock content %}

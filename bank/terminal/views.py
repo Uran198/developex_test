@@ -1,15 +1,16 @@
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
-from django.views.generic import FormView, TemplateView, RedirectView
+from django.views.generic import FormView, TemplateView, RedirectView, DetailView
 from django.contrib.auth import login, logout
 
 from braces.views import LoginRequiredMixin
 
 from .forms import PinForm, LoginForm, WithdrawMoneyForm
 from .models import Transaction
+from .mixins import RenderErrorMixin
 
 
-class LoginView(FormView):
+class LoginView(RenderErrorMixin, FormView):
     template_name = 'terminal/login.html'
     form_class = LoginForm
 
@@ -26,7 +27,7 @@ class LoginView(FormView):
         return super(LoginView, self).form_valid(form)
 
 
-class PinView(FormView):
+class PinView(RenderErrorMixin, FormView):
     template_name = 'terminal/pin.html'
     form_class = PinForm
 
@@ -57,12 +58,12 @@ class OperationsView(LoginRequiredMixin, TemplateView):
     template_name = 'terminal/operations.html'
 
 
-class WithdrawMoneyView(LoginRequiredMixin, FormView):
+class WithdrawMoneyView(LoginRequiredMixin, RenderErrorMixin, FormView):
     template_name = 'terminal/withdraw.html'
     form_class = WithdrawMoneyForm
 
     def get_success_url(self):
-        return reverse('terminal:operations')
+        return reverse('terminal:result', kwargs={'pk': self.transaction.pk})
 
     def get_form_kwargs(self):
         kwargs = super(WithdrawMoneyView, self).get_form_kwargs()
@@ -71,6 +72,7 @@ class WithdrawMoneyView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         form.save()
+        self.transaction = form.transaction
         return super(WithdrawMoneyView, self).form_valid(form)
 
 
@@ -85,9 +87,6 @@ class ShowBalanceView(LoginRequiredMixin, TemplateView):
         return super(ShowBalanceView, self).get(request, *args, **kwargs)
 
 
-class OperationResultView(LoginRequiredMixin, TemplateView):
+class OperationResultView(LoginRequiredMixin, DetailView):
     template_name = 'terminal/result.html'
-
-
-class ErrorView(TemplateView):
-    template_name = 'terminal/error.html'
+    model = Transaction

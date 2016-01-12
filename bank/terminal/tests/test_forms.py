@@ -38,6 +38,8 @@ class PinFormTest(TestCase):
             form.is_valid()
         self.user.refresh_from_db()
         self.assertEqual(self.user.is_blocked, True)
+        self.assertEqual(form.errors.as_data()['__all__'][0].message,
+                         "You have entered 4 wrong pin codes - Your card has been blocked")
 
     def test_3_wrong_tries(self):
         for _ in range(3):
@@ -108,6 +110,7 @@ class WithdrawMoneyFormTest(TestCase):
         self.assertEqual(self.user.balance, 80)
         self.assertEqual(len(Transaction.objects.all()), 1)
         transaction = Transaction.objects.first()
+        self.assertEqual(transaction, form.transaction)
         self.assertEqual(transaction.operation, 'WD')
         self.assertEqual(transaction.card, self.user)
         self.assertEqual(transaction.amount, 20)

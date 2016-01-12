@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Transaction result</h1>
+
+<p>
+Card number: {{ object.card.number }}
+</p>
+
+<p>
+Amount: {{ object.amount }}
+</p>
+
+<p>
+Current balance: {{ object.card.balance }}
+</p>
+
+<a href="{% url 'terminal:operations' %}"><button>Back</button></a>
+
+{% endblock content %}

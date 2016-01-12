@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Balance</h1>
+<p>
+{{user.balance}}
+</p>
+
+<a href="{% url 'terminal:operations' %}"><button>Back</button></a>
+
+{% endblock content %}

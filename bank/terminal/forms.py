@@ -27,8 +27,10 @@ class PinForm(forms.Form):
                 user.wrong_tries += 1
                 if user.wrong_tries >= 4:
                     user.is_blocked = True
+                    user.save()
+                    raise forms.ValidationError("You have entered 4 wrong pin codes - Your card has been blocked")
                 user.save()
-            except CardUser.DoesNotExist:
+            except (CardUser.DoesNotExist, KeyError):
                 pass
             raise forms.ValidationError("Wrong pin code")
         if user.is_blocked:
@@ -43,7 +45,7 @@ class LoginForm(forms.Form):
         data = super(LoginForm, self).clean()
         try:
             user = CardUser.objects.get(number=self.cleaned_data['number'])
-        except CardUser.DoesNotExist:
+        except (CardUser.DoesNotExist, KeyError):
             raise forms.ValidationError("Such card does not exist")
         if user.is_blocked:
             raise forms.ValidationError("The card is blocked")
@@ -70,7 +72,7 @@ class WithdrawMoneyForm(forms.Form):
         if self.is_valid():
             self.instance.balance -= self.cleaned_data['amount']
             self.instance.save()
-            Transaction.objects.create(
+            self.transaction = Transaction.objects.create(
                 operation='WD',
                 card=self.instance,
                 amount=self.cleaned_data['amount'],

@@ -8,4 +8,7 @@
   <input type="submit" value="Logout">
 </form>
 
+<a href="{% url 'terminal:withdraw' %}"><button>Withdraw Money</button></a>
+<a href="{% url 'terminal:balance' %}"><button>Show balance</button></a>
+
 {% endblock content %}

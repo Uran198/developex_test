@@ -74,7 +74,9 @@ class WithdrawMoneyViewTest(TestCase):
         self.factory = RequestFactory()
 
     def test_get_success_url(self):
-        self.assertEqual(self.view.get_success_url(), reverse('terminal:operations'))
+        self.view.transaction = mock.Mock(pk=2)
+        self.assertEqual(self.view.get_success_url(),
+                         reverse('terminal:result', kwargs={'pk': 2}))
 
     def test_get_for_kwargs(self):
         request = self.factory.get('fake/')
