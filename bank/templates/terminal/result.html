@@ -9,6 +9,10 @@ Card number: {{ object.card.number }}
 </p>
 
 <p>
+Date: {{ object.date }}
+</p>
+
+<p>
 Amount: {{ object.amount }}
 </p>
 
@@ -16,6 +20,10 @@ Amount: {{ object.amount }}
 Current balance: {{ object.card.balance }}
 </p>
 
-<a href="{% url 'terminal:operations' %}"><button>Back</button></a>
+<p>
+{% include 'terminal/_logout.html' %}
+</p>
+
+<a href="{% url 'terminal:withdraw' %}"><button>Back</button></a>
 
 {% endblock content %}

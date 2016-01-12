@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
 {% block content %}
 
-<form method="POST" action="">
-{% csrf_token %}
-{{ form }}
-<input type="submit" value="Submit">
-</form>
+<h1>Enter card number</h1>
+{% include "terminal/_keyboard.html" with display='login' %}
 
 {% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+    <script src="{% static 'js/project.js' %}"></script>
+{% endblock javascript %}

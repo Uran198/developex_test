@@ -9,8 +9,6 @@
 {{ error }}
 {% endfor %}
 
-<a href=""><button>Back</button></a>
-
-{# {{ request.META.HTTP_REFERER }} #}
+<a href="{{ request.META.HTTP_REFERER }}"><button>Back</button></a>
 
 {% endblock content %}

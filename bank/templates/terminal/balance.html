@@ -4,9 +4,16 @@
 
 <h1>Balance</h1>
 <p>
-{{user.balance}}
+Card number: {{ user.number }}
+</p>
+<p>
+Date: {% now "Y.m.d" %}
+</p>
+<p>
+Balance: {{ user.balance }}
 </p>
 
 <a href="{% url 'terminal:operations' %}"><button>Back</button></a>
+{% include 'terminal/_logout.html' %}
 
 {% endblock content %}

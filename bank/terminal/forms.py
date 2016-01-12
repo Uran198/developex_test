@@ -11,7 +11,7 @@ class PinForm(forms.Form):
                              widget=forms.HiddenInput())
     password = forms.CharField(max_length=4,
                                min_length=4,
-                               widget=forms.PasswordInput())
+                               widget=forms.HiddenInput(attrs={'id': "input_id"}))
 
     def clean(self):
         data = super(PinForm, self).clean()
@@ -39,7 +39,7 @@ class PinForm(forms.Form):
 
 
 class LoginForm(forms.Form):
-    number = forms.CharField(max_length=16, min_length=16)
+    number = forms.CharField(max_length=16, min_length=16, widget=forms.HiddenInput(attrs={'id': "input_id"}))
 
     def clean(self):
         data = super(LoginForm, self).clean()
@@ -53,7 +53,7 @@ class LoginForm(forms.Form):
 
 
 class WithdrawMoneyForm(forms.Form):
-    amount = forms.IntegerField(min_value=0)
+    amount = forms.IntegerField(min_value=0, widget=forms.HiddenInput(attrs={'id': "input_id"}))
 
     def __init__(self, *args, **kwargs):
         self.instance = kwargs.pop('instance', None)
